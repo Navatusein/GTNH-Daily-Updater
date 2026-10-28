@@ -183,6 +183,11 @@ func TestBuildDisplayVersionUsesModeCounter(t *testing.T) {
 	if latest.Long != "2.9.x (Daily 648+) - 2026-07-28" {
 		t.Errorf("latest = %q", latest.Long)
 	}
+
+	pinned := buildDisplayVersion(m, db, manifest.ModeDaily, "2.9.0-nightly-2026-07-28", Options{Build: "daily-2026-07-28+640"})
+	if pinned.Long != "2.9.x (Daily 640) - 2026-07-28" {
+		t.Errorf("pinned build = %q", pinned.Long)
+	}
 }
 
 // TestRecordDisplayVersionIfChanged covers the already-up-to-date early

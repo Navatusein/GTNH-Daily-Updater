@@ -132,6 +132,26 @@ func resolveSharedData(ctx context.Context, state *config.LocalState, shared *Sh
 	return m, db, mode, nil
 }
 
+// fetchBuildData loads the manifest of a pinned GTNH-Daily-Builds release.
+// Only daily builds are published there, so experimental instances are refused.
+func fetchBuildData(ctx context.Context, state *config.LocalState, build, token string) (*manifest.DailyManifest, *assets.AssetsDB, string, error) {
+	mode := resolveMode(state)
+	if mode != manifest.ModeDaily {
+		return nil, nil, "", fmt.Errorf("--build needs a daily instance, this one is %s", mode)
+	}
+	logging.Infof("Fetching manifest of daily build %s...\n", build)
+	m, err := manifest.FetchBuild(ctx, build, token)
+	if err != nil {
+		return nil, nil, "", fmt.Errorf("fetching manifest: %w", err)
+	}
+	logging.Debugf("Verbose: fetched build manifest updated=%s config=%s\n", m.LastUpdated, m.Config)
+	db, err := fetchAndLogAssetsDB(ctx)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	return m, db, mode, nil
+}
+
 func refreshTrackedMods(state *config.LocalState, db *assets.AssetsDB, m *manifest.DailyManifest, modsDir string) error {
 	logging.Infoln("Scanning mods directory...")
 	allManifestMods := m.AllMods()
@@ -502,6 +522,10 @@ func buildDisplayVersion(m *manifest.DailyManifest, db *assets.AssetsDB, mode, c
 	count := db.LatestDaily
 	if mode == manifest.ModeExperimental {
 		count = db.LatestExperimental
+	}
+	// A pinned build carries its own counter in the tag.
+	if n, err := manifest.BuildNumber(opts.Build); opts.Build != "" && err == nil {
+		count = n
 	}
 	// --latest picks mods past the counted build, marked with a "+" on the count.
 	return versionstamp.Build(configVersion, mode, count, m.LastUpdated, opts.Latest)

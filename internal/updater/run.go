@@ -4,6 +4,7 @@ import (
 	"context"
 	"path/filepath"
 
+	"github.com/caedis/gtnh-daily-updater/internal/assets"
 	"github.com/caedis/gtnh-daily-updater/internal/config"
 	"github.com/caedis/gtnh-daily-updater/internal/diff"
 	"github.com/caedis/gtnh-daily-updater/internal/github"
@@ -21,7 +22,14 @@ func Run(ctx context.Context, opts Options) (*UpdateResult, error) {
 		return nil, err
 	}
 
-	m, db, mode, err := resolveSharedData(ctx, state, opts.Shared)
+	var m *manifest.DailyManifest
+	var db *assets.AssetsDB
+	var mode string
+	if opts.Build != "" {
+		m, db, mode, err = fetchBuildData(ctx, state, opts.Build, opts.GithubToken)
+	} else {
+		m, db, mode, err = resolveSharedData(ctx, state, opts.Shared)
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -27,6 +27,9 @@ type Options struct {
 	// NoVersionStamp disables writing the pack version into config files,
 	// server.properties and instance.cfg.
 	NoVersionStamp bool
+	// Build pins the update to a GTNH-Daily-Builds release tag such as
+	// "daily-2026-10-27+803" instead of the latest daily manifest.
+	Build string
 	// Shared optionally supplies pre-fetched manifest and assets DB.
 	// When non-nil, Run skips those network fetches.
 	Shared *SharedData

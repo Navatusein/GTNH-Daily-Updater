@@ -16,6 +16,7 @@ var (
 	cacheDir       string
 	noCache        bool
 	noVersionStamp bool
+	build          string
 )
 
 var updateCmdName = "update"
@@ -35,6 +36,7 @@ var updateCmd = &cobra.Command{
 			CacheDir:       cacheDir,
 			NoCache:        noCache,
 			NoVersionStamp: noVersionStamp,
+			Build:          build,
 		}
 
 		result, err := updater.Run(context.Background(), opts)
@@ -78,6 +80,7 @@ func init() {
 	updateCmd.Flags().StringVar(&cacheDir, "cache-dir", "", "Directory for caching downloaded mods (default: OS user cache dir + /gtnh-daily-updater/mods/)")
 	updateCmd.Flags().BoolVar(&noCache, "no-cache", false, "Disable download caching")
 	updateCmd.Flags().BoolVar(&noVersionStamp, "no-version-stamp", false, "Do not write the pack version into config files, server.properties or instance.cfg")
+	updateCmd.Flags().StringVar(&build, "build", "", "Update to a specific GTNH-Daily-Builds release tag (e.g. daily-2026-10-27+803) instead of the latest daily")
 	rootCmd.AddCommand(updateCmd)
 }
 
